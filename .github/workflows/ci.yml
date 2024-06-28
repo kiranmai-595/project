@@ -20,7 +20,7 @@ jobs:
 
       # Build the Docker image using docker-compose
       - name: Build Docker Image
-        run: docker-compose build
+        run: docker-compose -f ./Docker-compose.yml
 
       # Run tests inside the Docker container
       - name: Run Tests
