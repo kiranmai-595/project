@@ -1,1 +1,1 @@
-
+create database CompanyDB;
