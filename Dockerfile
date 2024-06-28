@@ -1,21 +1,33 @@
-version: '3.8'  # version of Docker Compose syntax
+FROM mcr.microsoft.com/mssql/server:2022-latest as base
 
-services:
-  sqlserver:
-    build:
-      context: .
-      dockerfile: Dockerfile  # Path to the Dockerfile
-    environment:
-      ACCEPT_EULA: Y
-      SA_PASSWORD: "Sairam123" 
-      RUN_UNIT_TESTS: "true"
-      RUN_INTEGRATION_TESTS: "true"
-    ports:
-      - "1433:1433"  # Expose SQL Server port
-    volumes:
-      - ./db-create_database:/scripts/db-create_database
-      - ./db-deployment:/scripts/db-deployment
-      - ./test-data:/scripts/test-data
-      - ./unit-tests:/scripts/unit-tests
-      - ./integration-tests:/scripts/integration-tests
-    user: mssql
+# Environment variables 
+ENV RUN_UNIT_TESTS=true
+ENV RUN_INTEGRATION_TESTS=true
+ENV ACCEPT_EULA=Y
+ENV SA_PASSWORD=Sairam123
+USER root
+# Create directories for artifacts
+RUN mkdir -p /scripts/db-deployment /scripts/test-data /scripts/unit-tests /scripts/integration-tests
+
+# Copy artifacts into the image
+COPY ./db-create_database/* /scripts/db-create_database/
+COPY ./db-deployment/* /scripts/db-deployment/
+COPY ./test-data/* /scripts/test-data/
+COPY ./unit-tests/* /scripts/unit-tests/
+COPY ./integration-tests/* /scripts/integration-tests/
+
+# Copy entrypoint script
+COPY entrypoint.sh /scripts/entrypoint.sh
+
+# Grant permissions for the entrypoint script to be executable
+RUN chmod +x /scripts/entrypoint.sh
+USER mssql
+# Set the working directory
+WORKDIR /scripts
+
+# Expose SQL Server default port
+EXPOSE 1433
+
+# Start SQL Server and run the entrypoint script
+CMD ["/bin/bash", "/scripts/entrypoint.sh"]
+
