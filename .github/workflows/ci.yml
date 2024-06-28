@@ -22,13 +22,17 @@ jobs:
       - name: Build Docker Image
         run: docker-compose -f ./Docker-compose.yml build
 
-      # Run tests inside the Docker container
-      - name: Run Tests
-        run: |
-          docker-compose -f ./Docker-compose.yml up -d  # Start the containers in detached mode
-          # Add waiting logic here before running tests if needed
-          sleep 30s  # Example: wait for 30 seconds for containers to start (adjust as necessary)
-          docker-compose -f ./Docker-compose.yml exec sqlserver /bin/bash -c 'chmod +x /scripts/entrypoint.sh && /scripts/entrypoint.sh'
+      # Start containers in detached mode
+      - name: Start Docker Containers
+        run: docker-compose -f ./Docker-compose.yml up -d
+
+      # Wait for SQL Server to initialize (adjust time as necessary)
+      - name: Wait for SQL Server
+        run: sleep 30s  # Adjust as needed based on your application's startup time
+
+      # Execute entrypoint script inside SQL Server container
+      - name: Execute Entry Point Script
+        run: docker-compose -f ./Docker-compose.yml exec -T sqlserver /bin/bash -c 'chmod +x /scripts/entrypoint.sh && /scripts/entrypoint.sh'
 
       # Perform additional steps if needed, such as publishing test results or artifacts
 
