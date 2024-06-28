@@ -32,7 +32,7 @@ jobs:
 
       # Execute entrypoint script inside SQL Server container
       - name: Execute Entry Point Script
-        run: docker-compose -f ./Docker-compose.yml exec -T sqlserver /bin/bash -c 'chmod +x /scripts/entrypoint.sh && /scripts/entrypoint.sh'
+        run: docker-compose -f ./Docker-compose.yml exec -T sqlserver /bin/bash -c '/scripts/entrypoint.sh'
 
       # Perform additional steps if needed, such as publishing test results or artifacts
 
