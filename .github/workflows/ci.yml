@@ -1,40 +1,37 @@
-name: CI
+name: Continuous Integration
 
 on:
   push:
     branches:
-      - main  # Set the branch you want to trigger on
+      - main  # Trigger on pushes to the main branch
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
-
-    services:
-      sqlserver:
-        image: mcr.microsoft.com/mssql/server:2019-latest
-        env:
-          ACCEPT_EULA: Y
-          SA_PASSWORD: Sairam123
-        ports:
-          - 1433:1433
-        options: --health-cmd "SELECT 1" --health-interval 10s --health-timeout 5s --health-retries 3
+    runs-on: ubuntu-latest  # Use Ubuntu as the operating system for the job
 
     steps:
-      - name: Checkout repository
+      # Checkout the repository to the runner
+      - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Build and start services
-        run: |
-          docker-compose up -d
-          docker-compose ps
+      # Set up Docker Buildx for multi-platform builds (optional but recommended)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-      - name: Run unit tests
-        run: |
-          docker-compose exec sqlserver /bin/bash -c "cd /scripts/unit-tests && pytest"
+      # Build the Docker image using docker-compose
+      - name: Build Docker Image
+        run: docker-compose build
 
-      - name: Run integration tests
+      # Run tests inside the Docker container
+      - name: Run Tests
         run: |
-          docker-compose exec sqlserver /bin/bash -c "cd /scripts/integration-tests && pytest"
+          docker-compose up -d  # Start the containers in detached mode
+          docker-compose exec sqlserver /bin/bash -c 'chmod +x /scripts/entrypoint.sh && /scripts/entrypoint.sh'
 
-      - name: Stop services
+      # Perform additional steps if needed, such as publishing test results or artifacts
+
+      # Stop and clean up the Docker containers after tests
+      - name: Stop Docker Containers
         run: docker-compose down
+
+      # Optionally, push the Docker image to a registry for deployment (if applicable)
