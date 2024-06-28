@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main  # Set the branch you want to trigger on
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: Sairam123
+        ports:
+          - 1433:1433
+        options: --health-cmd "SELECT 1" --health-interval 10s --health-timeout 5s --health-retries 3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build and start services
+        run: |
+          docker-compose up -d
+          docker-compose ps
+
+      - name: Run unit tests
+        run: |
+          docker-compose exec sqlserver /bin/bash -c "cd /scripts/unit-tests && pytest"
+
+      - name: Run integration tests
+        run: |
+          docker-compose exec sqlserver /bin/bash -c "cd /scripts/integration-tests && pytest"
+
+      - name: Stop services
+        run: docker-compose down
