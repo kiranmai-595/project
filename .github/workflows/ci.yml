@@ -16,6 +16,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
+      - name: Stop and Remove Docker Containers
+        run: docker-compose -f ./Docker-compose.yml down -v
+
       - name: Build Docker Image
         run: docker-compose -f ./Docker-compose.yml build --no-cache=false
 
