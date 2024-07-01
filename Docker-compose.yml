@@ -11,7 +11,7 @@ services:
       RUN_UNIT_TESTS: "true"
       RUN_INTEGRATION_TESTS: "true"
     ports:
-      - "1433:1433"  # Expose SQL Server port
+      - "1434:1433"  # Expose SQL Server port
     volumes:
       - ./db-create_database:/scripts/db-create_database
       - ./db-deployment:/scripts/db-deployment
